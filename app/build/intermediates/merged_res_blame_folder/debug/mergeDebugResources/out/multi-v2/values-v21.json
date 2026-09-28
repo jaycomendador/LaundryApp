@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.washday.laundry.app-mergeDebugResources-44:/values-v21/values-v21.xml",
+            "outputFile": "com.washday.laundry.app-mergeDebugResources-48:/values-v21/values-v21.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Jay Comendador\\.gradle\\caches\\8.11.1\\transforms\\e5cc1334381f21ba9c1dbbf46f0d3a71\\transformed\\core-1.13.1\\res\\values-v21\\values-v21.xml",
+                    "source": "C:\\Users\\Jay Comendador\\.gradle\\caches\\8.11.1\\transforms\\b2b056f3bf1e7fdc43c9bc304a4e7239\\transformed\\core-1.13.1\\res\\values-v21\\values-v21.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,13",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4",
