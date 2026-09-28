@@ -2,17 +2,25 @@ package com.washday.laundry.model
 
 enum class ShopTab(val title: String, val iconName: String) {
     DASHBOARD("Dashboard", "home"),
-    ORDERS("Orders", "receipt"),
     NEW_ORDER("New Order", "plus"),
-    SALES("Sales Report", "chart"),
-    SERVICES("Services", "washer")
+    SERVICES("Services", "washer"),
+    ORDERS("Orders", "receipt"),
+    SALES("Sales Summary", "chart"),
+    CUSTOMERS("Customers", "user"),
+    SETTINGS("Settings", "gear")
 }
+
+data class UserSession(
+    val username: String,
+    val name: String,
+    val role: String = "Admin / Staff"
+)
 
 data class LaundryService(
     val id: String,
     val name: String,
     val detail: String? = null,
-    val pricePerKg: Int,
+    val pricePerKg: Double,
     val iconName: String
 )
 
@@ -22,11 +30,23 @@ data class LaundryOrder(
     val contactNumber: String,
     val serviceName: String,
     val date: String,
+    val time: String,
+    val weightKg: Double,
+    val pricePerKg: Double,
+    val basePrice: Double,
+    val additionalCharges: Double = 0.0,
     val totalAmount: Double,
-    val weightKg: Int,
-    val status: String, // Received, Washing, Drying, Ready for Pickup, Completed
-    val paymentStatus: String = "Paid",
-    val time: String = "Today, 4:30 PM"
+    val status: String, // Received, Washing, Drying, Ready for Pickup, Claimed
+    val paymentStatus: String = "Paid"
+)
+
+data class CustomerRecord(
+    val id: String,
+    val name: String,
+    val contactNumber: String,
+    val totalOrders: Int,
+    val totalSpent: Double,
+    val lastOrderDate: String
 )
 
 data class AppNotification(
@@ -38,10 +58,10 @@ data class AppNotification(
 )
 
 data class DailySalesSummary(
-    val totalRevenueToday: Double = 8460.0,
-    val ordersNeedingAttention: Int = 3,
-    val ordersReadyForPickup: Int = 5,
-    val completedOrdersToday: Int = 12
+    val totalRevenueToday: Double,
+    val totalOrdersCount: Int,
+    val inProgressCount: Int,
+    val completedCount: Int
 )
 
 data class WeeklySalesPoint(
@@ -51,14 +71,6 @@ data class WeeklySalesPoint(
 
 data class ServiceSalesSplit(
     val serviceName: String,
-    val percentage: Int,
-    val amount: Double
-)
-
-data class TransactionItem(
-    val orderId: String,
-    val customerName: String,
-    val date: String,
-    val amount: String,
-    val status: String
+    val amount: Double,
+    val percentage: Int
 )

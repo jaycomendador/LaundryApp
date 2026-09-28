@@ -2,7 +2,6 @@ package com.washday.laundry.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +10,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.LocalLaundryService
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Badge
@@ -38,12 +40,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.washday.laundry.model.AppNotification
-import com.washday.laundry.ui.theme.WashdayBlue
-import com.washday.laundry.ui.theme.WashdayBlueLight
-import com.washday.laundry.ui.theme.WashdayCanvas
-import com.washday.laundry.ui.theme.WashdayLine
-import com.washday.laundry.ui.theme.WashdayTextMuted
-import com.washday.laundry.ui.theme.WashdayTextPrimary
+import com.washday.laundry.ui.theme.LaundryMateCanvas
+import com.washday.laundry.ui.theme.LaundryMateLine
+import com.washday.laundry.ui.theme.LaundryPinkLight
+import com.washday.laundry.ui.theme.LaundryPinkPrimary
+import com.washday.laundry.ui.theme.LaundryTextMuted
+import com.washday.laundry.ui.theme.LaundryTextPrimary
 
 @Composable
 fun ShopHeader(
@@ -55,39 +57,67 @@ fun ShopHeader(
     val hasUnread = notifications.any { !it.isRead }
 
     Surface(
-        color = WashdayCanvas,
-        modifier = modifier.fillMaxWidth()
+        color = LaundryMateCanvas,
+        modifier = modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 14.dp),
+                .padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Shop Brand
-            Column {
-                Text(
-                    text = "Washday",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = WashdayTextPrimary,
-                    letterSpacing = (-0.5).sp
-                )
-                Text(
-                    text = "Laundry Management Portal",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = WashdayTextMuted
-                )
+            // Laundry Mate Logo & Title
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(LaundryPinkPrimary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.LocalLaundryService,
+                            contentDescription = "Logo",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(8.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Column {
+                    Text(
+                        text = "Laundry Mate",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = LaundryPinkPrimary,
+                        letterSpacing = (-0.5).sp
+                    )
+                    Text(
+                        text = "Clean Clothes Happy Days",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = LaundryTextMuted
+                    )
+                }
             }
 
-            // Notification & Shop Manager Profile
+            // Notification & Profile Badge
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Notification Button
                 Box {
                     IconButton(
                         onClick = {
@@ -95,16 +125,16 @@ fun ShopHeader(
                             onMarkNotificationsRead()
                         },
                         modifier = Modifier
-                            .size(38.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
                             .background(Color.White)
-                            .border(1.dp, WashdayLine, CircleShape)
+                            .border(1.dp, LaundryMateLine, CircleShape)
                     ) {
                         BadgedBox(
                             badge = {
                                 if (hasUnread) {
                                     Badge(
-                                        containerColor = WashdayBlue,
+                                        containerColor = LaundryPinkPrimary,
                                         modifier = Modifier.size(8.dp)
                                     )
                                 }
@@ -113,7 +143,7 @@ fun ShopHeader(
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifications",
-                                tint = WashdayTextPrimary,
+                                tint = LaundryTextPrimary,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -127,16 +157,16 @@ fun ShopHeader(
                             .background(Color.White)
                     ) {
                         Text(
-                            text = "Shop Notifications",
+                            text = "Notifications",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = WashdayTextPrimary,
+                            color = LaundryTextPrimary,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                         )
 
                         if (notifications.isEmpty()) {
                             DropdownMenuItem(
-                                text = { Text("No new notifications", fontSize = 13.sp, color = WashdayTextMuted) },
+                                text = { Text("No new notifications", fontSize = 13.sp, color = LaundryTextMuted) },
                                 onClick = { showNotifMenu = false }
                             )
                         } else {
@@ -148,12 +178,12 @@ fun ShopHeader(
                                                 text = notif.title,
                                                 fontSize = 13.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = WashdayTextPrimary
+                                                color = LaundryTextPrimary
                                             )
                                             Text(
                                                 text = notif.message,
                                                 fontSize = 12.sp,
-                                                color = WashdayTextMuted
+                                                color = LaundryTextMuted
                                             )
                                         }
                                     },
@@ -164,41 +194,41 @@ fun ShopHeader(
                     }
                 }
 
-                // Manager Profile Badge
+                // Profile Badge
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .background(Color.White)
-                        .border(1.dp, WashdayLine, RoundedCornerShape(20.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .border(1.dp, LaundryMateLine, RoundedCornerShape(20.dp))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(22.dp)
                             .clip(CircleShape)
-                            .background(WashdayBlueLight),
+                            .background(LaundryPinkLight),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Storefront,
-                            contentDescription = "Shop Manager",
-                            tint = WashdayBlue,
-                            modifier = Modifier.size(14.dp)
+                            contentDescription = "Staff Profile",
+                            tint = LaundryPinkPrimary,
+                            modifier = Modifier.size(13.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Column {
                         Text(
-                            text = "Lena Morales",
+                            text = "Staff",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = WashdayTextPrimary
+                            color = LaundryTextPrimary
                         )
                         Text(
-                            text = "Shop manager",
+                            text = "Admin",
                             fontSize = 10.sp,
-                            color = WashdayTextMuted
+                            color = LaundryTextMuted
                         )
                     }
                 }

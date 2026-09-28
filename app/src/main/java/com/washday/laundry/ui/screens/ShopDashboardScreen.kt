@@ -17,10 +17,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,16 +49,17 @@ import com.washday.laundry.model.DailySalesSummary
 import com.washday.laundry.model.LaundryOrder
 import com.washday.laundry.model.ShopTab
 import com.washday.laundry.ui.components.DigitalReceiptDialog
-import com.washday.laundry.ui.theme.WashdayAmber
-import com.washday.laundry.ui.theme.WashdayAmberLight
-import com.washday.laundry.ui.theme.WashdayBlue
-import com.washday.laundry.ui.theme.WashdayBlueLight
-import com.washday.laundry.ui.theme.WashdayCanvas
-import com.washday.laundry.ui.theme.WashdayGreen
-import com.washday.laundry.ui.theme.WashdayGreenLight
-import com.washday.laundry.ui.theme.WashdayLine
-import com.washday.laundry.ui.theme.WashdayTextMuted
-import com.washday.laundry.ui.theme.WashdayTextPrimary
+import com.washday.laundry.ui.theme.LaundryAmber
+import com.washday.laundry.ui.theme.LaundryAmberLight
+import com.washday.laundry.ui.theme.LaundryGreen
+import com.washday.laundry.ui.theme.LaundryGreenLight
+import com.washday.laundry.ui.theme.LaundryMateCanvas
+import com.washday.laundry.ui.theme.LaundryMateLine
+import com.washday.laundry.ui.theme.LaundryPinkDark
+import com.washday.laundry.ui.theme.LaundryPinkLight
+import com.washday.laundry.ui.theme.LaundryPinkPrimary
+import com.washday.laundry.ui.theme.LaundryTextMuted
+import com.washday.laundry.ui.theme.LaundryTextPrimary
 
 @Composable
 fun ShopDashboardScreen(
@@ -70,19 +71,19 @@ fun ShopDashboardScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedOrderForReceipt by remember { mutableStateOf<LaundryOrder?>(null) }
-    val statusOptions = listOf("Received", "Washing", "Drying", "Ready for Pickup", "Completed")
+    val statusOptions = listOf("Pending", "In Progress", "Ready for Pickup", "Completed")
 
     Column(
         modifier = modifier
-            .background(WashdayCanvas)
+            .background(LaundryMateCanvas)
             .verticalScroll(rememberScrollState())
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Shop Manager Hero Banner
+        // Staff Hero Banner
         Card(
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = WashdayTextPrimary),
+            colors = CardDefaults.cardColors(containerColor = LaundryPinkPrimary),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -97,11 +98,11 @@ fun ShopDashboardScreen(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color.White.copy(alpha = 0.15f))
+                                .background(Color.White.copy(alpha = 0.2f))
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = "LAUNDRY SHOP MANAGER",
+                                text = "LAUNDRY MATE PORTAL",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
@@ -112,15 +113,15 @@ fun ShopDashboardScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "Lena Morales",
+                            text = "Good Morning, Staff!",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White
                         )
                         Text(
-                            text = "Your shop is running smoothly.",
+                            text = "Here's today's summary",
                             fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.8f)
+                            color = Color.White.copy(alpha = 0.9f)
                         )
                     }
 
@@ -128,28 +129,11 @@ fun ShopDashboardScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(WashdayBlue),
+                            .background(Color.White.copy(alpha = 0.2f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(Icons.Default.Storefront, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
                     }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .padding(14.dp)
-                ) {
-                    Text(
-                        text = "3 orders need your attention, and 5 are ready for pickup.",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White
-                    )
                 }
             }
         }
@@ -165,10 +149,9 @@ fun ShopDashboardScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Today's Sales", fontSize = 11.sp, color = WashdayTextMuted, fontWeight = FontWeight.Bold)
+                    Text("Total Sales", fontSize = 11.sp, color = LaundryTextMuted, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(6.dp))
-                    Text("₱8,460", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = WashdayBlue)
-                    Text("+12% vs yesterday", fontSize = 10.sp, color = WashdayGreen, fontWeight = FontWeight.Bold)
+                    Text("₱${dailySalesSummary.totalRevenueToday.toInt()}", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = LaundryPinkPrimary)
                 }
             }
 
@@ -178,10 +161,9 @@ fun ShopDashboardScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Attention Req.", fontSize = 11.sp, color = WashdayTextMuted, fontWeight = FontWeight.Bold)
+                    Text("In Progress", fontSize = 11.sp, color = LaundryTextMuted, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(6.dp))
-                    Text("${dailySalesSummary.ordersNeedingAttention} orders", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = WashdayAmber)
-                    Text("Action needed", fontSize = 10.sp, color = WashdayAmber, fontWeight = FontWeight.Bold)
+                    Text("${dailySalesSummary.inProgressCount} orders", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = LaundryAmber)
                 }
             }
 
@@ -191,10 +173,9 @@ fun ShopDashboardScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Ready Pickup", fontSize = 11.sp, color = WashdayTextMuted, fontWeight = FontWeight.Bold)
+                    Text("Completed", fontSize = 11.sp, color = LaundryTextMuted, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(6.dp))
-                    Text("${dailySalesSummary.ordersReadyForPickup} orders", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = WashdayGreen)
-                    Text("Ready for customer", fontSize = 10.sp, color = WashdayGreen, fontWeight = FontWeight.Bold)
+                    Text("${dailySalesSummary.completedCount} orders", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = LaundryGreen)
                 }
             }
         }
@@ -206,8 +187,8 @@ fun ShopDashboardScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Quick Actions", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = WashdayTextPrimary)
-                Text("Shortcuts for daily tasks", fontSize = 12.sp, color = WashdayTextMuted)
+                Text("Quick Actions", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LaundryTextPrimary)
+                Text("Shortcuts for daily tasks", fontSize = 12.sp, color = LaundryTextMuted)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -217,7 +198,7 @@ fun ShopDashboardScreen(
                 ) {
                     Button(
                         onClick = { onNavigateToTab(ShopTab.NEW_ORDER) },
-                        colors = ButtonDefaults.buttonColors(containerColor = WashdayBlue),
+                        colors = ButtonDefaults.buttonColors(containerColor = LaundryPinkPrimary),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.weight(1f)
                     ) {
@@ -231,9 +212,9 @@ fun ShopDashboardScreen(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(Icons.Default.BarChart, contentDescription = null, modifier = Modifier.size(16.dp), tint = WashdayTextPrimary)
+                        Icon(Icons.Default.BarChart, contentDescription = null, modifier = Modifier.size(16.dp), tint = LaundryTextPrimary)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Sales Report", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = WashdayTextPrimary)
+                        Text("Sales Report", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LaundryTextPrimary)
                     }
 
                     OutlinedButton(
@@ -241,9 +222,9 @@ fun ShopDashboardScreen(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(Icons.Default.ListAlt, contentDescription = null, modifier = Modifier.size(16.dp), tint = WashdayTextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ListAlt, contentDescription = null, modifier = Modifier.size(16.dp), tint = LaundryTextPrimary)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("All Orders", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = WashdayTextPrimary)
+                        Text("All Orders", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LaundryTextPrimary)
                     }
                 }
             }
@@ -265,12 +246,12 @@ fun ShopDashboardScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Recent Orders", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = WashdayTextPrimary)
-                        Text("Track today's latest laundry orders", fontSize = 12.sp, color = WashdayTextMuted)
+                        Text("Recent Orders", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = LaundryTextPrimary)
+                        Text("Track today's latest laundry orders", fontSize = 12.sp, color = LaundryTextMuted)
                     }
                 }
 
-                HorizontalDivider(color = WashdayLine)
+                HorizontalDivider(color = LaundryMateLine)
 
                 orders.take(4).forEach { order ->
                     var showStatusMenu by remember { mutableStateOf(false) }
@@ -282,11 +263,11 @@ fun ShopDashboardScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("Order #${order.id}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = WashdayTextPrimary)
+                                Text("#${order.id}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LaundryTextPrimary)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(order.customerName, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WashdayBlue)
+                                Text(order.customerName, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = LaundryPinkPrimary)
                             }
-                            Text("${order.serviceName} • ${order.weightKg} kg • ${order.contactNumber}", fontSize = 12.sp, color = WashdayTextMuted)
+                            Text("${order.serviceName} • ${order.weightKg} kg • ${order.contactNumber}", fontSize = 12.sp, color = LaundryTextMuted)
                         }
 
                         Row(
@@ -296,14 +277,14 @@ fun ShopDashboardScreen(
                             // Status Picker
                             Box {
                                 val statusBg = when (order.status) {
-                                    "Completed", "Ready for Pickup" -> WashdayGreenLight
-                                    "Washing", "Drying" -> WashdayBlueLight
-                                    else -> WashdayAmberLight
+                                    "Completed" -> LaundryGreenLight
+                                    "In Progress" -> LaundryAmberLight
+                                    else -> LaundryPinkLight
                                 }
                                 val statusFg = when (order.status) {
-                                    "Completed", "Ready for Pickup" -> WashdayGreen
-                                    "Washing", "Drying" -> WashdayBlue
-                                    else -> WashdayAmber
+                                    "Completed" -> LaundryGreen
+                                    "In Progress" -> LaundryAmber
+                                    else -> LaundryPinkDark
                                 }
 
                                 Box(
@@ -335,13 +316,13 @@ fun ShopDashboardScreen(
 
                             IconButton(
                                 onClick = { selectedOrderForReceipt = order },
-                                modifier = Modifier.size(36.dp).clip(CircleShape).background(WashdayCanvas)
+                                modifier = Modifier.size(36.dp).clip(CircleShape).background(LaundryMateCanvas)
                             ) {
-                                Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Receipt", tint = WashdayTextPrimary, modifier = Modifier.size(18.dp))
+                                Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Receipt", tint = LaundryTextPrimary, modifier = Modifier.size(18.dp))
                             }
                         }
                     }
-                    HorizontalDivider(color = WashdayLine)
+                    HorizontalDivider(color = LaundryMateLine)
                 }
             }
         }
