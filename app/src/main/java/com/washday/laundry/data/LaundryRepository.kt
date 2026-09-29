@@ -1,6 +1,12 @@
 package com.washday.laundry.data
 
 import android.content.Context
+import com.washday.laundry.database.LaundryRoomDatabase
+import com.washday.laundry.database.NotificationEntity
+import com.washday.laundry.database.OrderEntity
+import com.washday.laundry.database.ServiceEntity
+import com.washday.laundry.database.toDomainModel
+import com.washday.laundry.database.toEntity
 import com.washday.laundry.model.AppNotification
 import com.washday.laundry.model.CustomerRecord
 import com.washday.laundry.model.DailySalesSummary
@@ -9,10 +15,15 @@ import com.washday.laundry.model.LaundryService
 import com.washday.laundry.model.ServiceSalesSplit
 import com.washday.laundry.model.UserSession
 import com.washday.laundry.model.WeeklySalesPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -22,8 +33,12 @@ import java.util.Locale
 
 class LaundryRepository(context: Context) {
 
-    private val ordersFile = File(context.filesDir, "laundry_orders.json")
-    private val servicesFile = File(context.filesDir, "laundry_services.json")
+    private val db = LaundryRoomDatabase.getDatabase(context)
+    private val orderDao = db.orderDao()
+    private val serviceDao = db.serviceDao()
+    private val notificationDao = db.notificationDao()
+
+    private val scope = CoroutineScope(Dispatchers.IO)
     private val sessionFile = File(context.filesDir, "laundry_session.json")
 
     private val _currentUser = MutableStateFlow<UserSession?>(null)
@@ -40,8 +55,70 @@ class LaundryRepository(context: Context) {
 
     init {
         loadSession()
-        loadServices()
-        loadOrders()
+
+        // Observe Room Flow for Services
+        scope.launch {
+            serviceDao.getAllServicesFlow().collect { entities ->
+                if (entities.isEmpty()) {
+                    seedDefaultServices()
+                } else {
+                    _services.value = entities.map { it.toDomainModel() }
+                }
+            }
+        }
+
+        // Observe Room Flow for Orders
+        scope.launch {
+            orderDao.getAllOrdersFlow().collect { entities ->
+                if (entities.isEmpty()) {
+                    seedDefaultOrders()
+                } else {
+                    _orders.value = entities.map { it.toDomainModel() }
+                }
+            }
+        }
+
+        // Observe Room Flow for Notifications
+        scope.launch {
+            notificationDao.getAllNotificationsFlow().collect { entities ->
+                if (entities.isEmpty()) {
+                    seedDefaultNotifications()
+                } else {
+                    _notifications.value = entities.map { it.toDomainModel() }
+                }
+            }
+        }
+    }
+
+    private suspend fun seedDefaultServices() {
+        val defaults = listOf(
+            ServiceEntity("1", "Regular", "Wash, dry & fold daily clothes", 55.0, "washer"),
+            ServiceEntity("2", "Executive", "Premium care with fabric softener", 75.0, "sparkles"),
+            ServiceEntity("3", "Bulk", "Large volume wash 10kg+", 45.0, "bag"),
+            ServiceEntity("4", "Dry Clean", "Delicate suits, coats & dresses", 120.0, "iron")
+        )
+        serviceDao.insertServices(defaults)
+    }
+
+    private suspend fun seedDefaultOrders() {
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
+        val todayStr = dateFormat.format(Date())
+
+        val defaults = listOf(
+            OrderEntity("00123", "Juan Dela Cruz", "0917 123 4567", "Regular", todayStr, "10:30 AM", 2.0, 55.0, 110.0, 0.0, 110.0, "In Progress"),
+            OrderEntity("00122", "Maria Santos", "0918 888 9999", "Executive", todayStr, "09:15 AM", 4.0, 75.0, 300.0, 0.0, 300.0, "Pending"),
+            OrderEntity("00121", "Pedro Reyes", "0920 444 5555", "Bulk", todayStr, "08:00 AM", 10.0, 45.0, 450.0, 0.0, 450.0, "Claimed"),
+            OrderEntity("00120", "Ana Lim", "0912 345 6789", "Dry Clean", "Sep 14, 2025", "04:00 PM", 2.0, 120.0, 240.0, 0.0, 240.0, "Claimed")
+        )
+        orderDao.insertOrders(defaults)
+    }
+
+    private suspend fun seedDefaultNotifications() {
+        val defaults = listOf(
+            NotificationEntity("1", "3 orders in progress", "3 orders in Received/Washing status.", "10m ago", false),
+            NotificationEntity("2", "5 orders ready for pickup", "Notify customers that their laundry is ready.", "1h ago", false)
+        )
+        notificationDao.insertNotifications(defaults)
     }
 
     // --- Authentication Backend ---
@@ -89,194 +166,66 @@ class LaundryRepository(context: Context) {
         }
     }
 
-    // --- Services Catalog Backend ---
-    private fun loadServices() {
-        if (!servicesFile.exists()) {
-            val defaultServices = listOf(
-                LaundryService("1", "Regular", "Wash, dry & fold daily clothes", 55.0, "washer"),
-                LaundryService("2", "Executive", "Premium care with fabric softener", 75.0, "sparkles"),
-                LaundryService("3", "Bulk", "Large volume wash 10kg+", 45.0, "bag"),
-                LaundryService("4", "Dry Clean", "Delicate suits, coats & dresses", 120.0, "iron")
-            )
-            _services.value = defaultServices
-            saveServices(defaultServices)
-        } else {
-            try {
-                val array = JSONArray(servicesFile.readText())
-                val list = mutableListOf<LaundryService>()
-                for (i in 0 until array.length()) {
-                    val obj = array.getJSONObject(i)
-                    list.add(
-                        LaundryService(
-                            obj.getString("id"),
-                            obj.getString("name"),
-                            if (obj.has("detail")) obj.optString("detail", "") else null,
-                            obj.getDouble("pricePerKg"),
-                            obj.optString("iconName", "washer")
-                        )
-                    )
-                }
-                _services.value = list
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun saveServices(list: List<LaundryService>) {
-        try {
-            val array = JSONArray()
-            list.forEach { s ->
-                val obj = JSONObject()
-                obj.put("id", s.id)
-                obj.put("name", s.name)
-                obj.put("detail", s.detail)
-                obj.put("pricePerKg", s.pricePerKg)
-                obj.put("iconName", s.iconName)
-                array.put(obj)
-            }
-            servicesFile.writeText(array.toString())
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun addService(name: String, detail: String?, pricePerKg: Double): LaundryService {
-        val nextId = (_services.value.size + 1).toString()
-        val newService = LaundryService(nextId, name, detail, pricePerKg, "washer")
-        val updated = _services.value + newService
-        _services.value = updated
-        saveServices(updated)
-        return newService
-    }
-
-    // --- Persistent Orders Backend ---
-    private fun loadOrders() {
-        if (!ordersFile.exists()) {
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
-            val todayStr = dateFormat.format(Date())
-
-            val initialOrders = listOf(
-                LaundryOrder("00123", "Juan Dela Cruz", "0917 123 4567", "Regular", todayStr, "10:30 AM", 2.0, 55.0, 110.0, 0.0, 110.0, "In Progress"),
-                LaundryOrder("00122", "Maria Santos", "0918 888 9999", "Executive", todayStr, "09:15 AM", 4.0, 75.0, 300.0, 0.0, 300.0, "Pending"),
-                LaundryOrder("00121", "Pedro Reyes", "0920 444 5555", "Bulk", todayStr, "08:00 AM", 10.0, 45.0, 450.0, 0.0, 450.0, "Claimed"),
-                LaundryOrder("00120", "Ana Lim", "0912 345 6789", "Dry Clean", "Sep 14, 2025", "04:00 PM", 2.0, 120.0, 240.0, 0.0, 240.0, "Claimed")
-            )
-            _orders.value = initialOrders
-            saveOrders(initialOrders)
-        } else {
-            try {
-                val array = JSONArray(ordersFile.readText())
-                val list = mutableListOf<LaundryOrder>()
-                for (i in 0 until array.length()) {
-                    val obj = array.getJSONObject(i)
-                    list.add(
-                        LaundryOrder(
-                            obj.getString("id"),
-                            obj.getString("customerName"),
-                            obj.getString("contactNumber"),
-                            obj.getString("serviceName"),
-                            obj.getString("date"),
-                            obj.optString("time", "10:00 AM"),
-                            obj.getDouble("weightKg"),
-                            obj.getDouble("pricePerKg"),
-                            obj.getDouble("basePrice"),
-                            obj.optDouble("additionalCharges", 0.0),
-                            obj.getDouble("totalAmount"),
-                            obj.getString("status"),
-                            obj.optString("paymentStatus", "Paid")
-                        )
-                    )
-                }
-                _orders.value = list
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun saveOrders(list: List<LaundryOrder>) {
-        try {
-            val array = JSONArray()
-            list.forEach { o ->
-                val obj = JSONObject()
-                obj.put("id", o.id)
-                obj.put("customerName", o.customerName)
-                obj.put("contactNumber", o.contactNumber)
-                obj.put("serviceName", o.serviceName)
-                obj.put("date", o.date)
-                obj.put("time", o.time)
-                obj.put("weightKg", o.weightKg)
-                obj.put("pricePerKg", o.pricePerKg)
-                obj.put("basePrice", o.basePrice)
-                obj.put("additionalCharges", o.additionalCharges)
-                obj.put("totalAmount", o.totalAmount)
-                obj.put("status", o.status)
-                obj.put("paymentStatus", o.paymentStatus)
-                array.put(obj)
-            }
-            ordersFile.writeText(array.toString())
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
+    // --- Room SQLite Operations ---
     fun saveNewOrder(
         customerName: String,
         contactNumber: String,
         service: LaundryService,
         weightKg: Double,
         additionalCharges: Double = 0.0
-    ): LaundryOrder {
-        val nextNum = (_orders.value.size + 124)
-        val orderId = String.format(Locale.US, "00%03d", nextNum)
+    ) {
+        scope.launch {
+            val nextNum = (_orders.value.size + 124)
+            val orderId = String.format(Locale.US, "00%03d", nextNum)
 
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
-        val timeFormat = SimpleDateFormat("hh:mm a", Locale.US)
-        val now = Date()
+            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
+            val timeFormat = SimpleDateFormat("hh:mm a", Locale.US)
+            val now = Date()
 
-        val basePrice = service.pricePerKg * weightKg
-        val total = basePrice + additionalCharges
+            val basePrice = service.pricePerKg * weightKg
+            val total = basePrice + additionalCharges
 
-        val newOrder = LaundryOrder(
-            id = orderId,
-            customerName = customerName.ifBlank { "Juan Dela Cruz" },
-            contactNumber = contactNumber.ifBlank { "0917 123 4567" },
-            serviceName = service.name,
-            date = dateFormat.format(now),
-            time = timeFormat.format(now),
-            weightKg = weightKg,
-            pricePerKg = service.pricePerKg,
-            basePrice = basePrice,
-            additionalCharges = additionalCharges,
-            totalAmount = total,
-            status = "Pending",
-            paymentStatus = "Paid"
-        )
+            val newEntity = OrderEntity(
+                id = orderId,
+                customerName = customerName.ifBlank { "Juan Dela Cruz" },
+                contactNumber = contactNumber.ifBlank { "0917 123 4567" },
+                serviceName = service.name,
+                date = dateFormat.format(now),
+                time = timeFormat.format(now),
+                weightKg = weightKg,
+                pricePerKg = service.pricePerKg,
+                basePrice = basePrice,
+                additionalCharges = additionalCharges,
+                totalAmount = total,
+                status = "Pending",
+                paymentStatus = "Paid"
+            )
 
-        val updated = listOf(newOrder) + _orders.value
-        _orders.value = updated
-        saveOrders(updated)
-        return newOrder
+            orderDao.insertOrder(newEntity)
+        }
     }
 
     fun updateOrderStatus(orderId: String, newStatus: String) {
-        val updated = _orders.value.map { order ->
-            if (order.id == orderId) {
-                order.copy(status = newStatus)
-            } else order
+        scope.launch {
+            orderDao.updateOrderStatus(orderId, newStatus)
         }
-        _orders.value = updated
-        saveOrders(updated)
     }
 
     fun deleteOrder(orderId: String) {
-        val updated = _orders.value.filter { it.id != orderId }
-        _orders.value = updated
-        saveOrders(updated)
+        scope.launch {
+            orderDao.deleteOrder(orderId)
+        }
     }
 
-    // --- Dynamic Sales & Analytics Backend ---
+    fun addService(name: String, detail: String?, pricePerKg: Double) {
+        scope.launch {
+            val nextId = (_services.value.size + 1).toString()
+            val newEntity = ServiceEntity(nextId, name, detail, pricePerKg, "washer")
+            serviceDao.insertService(newEntity)
+        }
+    }
+
+    // --- Room SQLite Dynamic Analytics ---
     fun getDailySalesSummary(): DailySalesSummary {
         val all = _orders.value
         val totalRev = all.sumOf { it.totalAmount }
@@ -339,8 +288,8 @@ class LaundryRepository(context: Context) {
     }
 
     fun markNotificationsRead() {
-        _notifications.update { list ->
-            list.map { it.copy(isRead = true) }
+        scope.launch {
+            notificationDao.markAllAsRead()
         }
     }
 
@@ -373,11 +322,11 @@ class LaundryRepository(context: Context) {
         return try {
             val root = JSONObject(jsonStr)
             val ordersArr = root.getJSONArray("orders")
-            val list = mutableListOf<LaundryOrder>()
+            val entities = mutableListOf<OrderEntity>()
             for (i in 0 until ordersArr.length()) {
                 val obj = ordersArr.getJSONObject(i)
-                list.add(
-                    LaundryOrder(
+                entities.add(
+                    OrderEntity(
                         obj.getString("id"),
                         obj.getString("customerName"),
                         obj.getString("contactNumber"),
@@ -394,8 +343,10 @@ class LaundryRepository(context: Context) {
                     )
                 )
             }
-            _orders.value = list
-            saveOrders(list)
+            scope.launch {
+                orderDao.deleteAllOrders()
+                orderDao.insertOrders(entities)
+            }
             true
         } catch (e: Exception) {
             e.printStackTrace()
