@@ -1,29 +1,45 @@
 package com.washday.laundry.ui.theme
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-// Laundry Mate Signature Pink Palette
-val LaundryPinkPrimary = Color(0xFFE05275)
-val LaundryPinkDark = Color(0xFFC2185B)
-val LaundryPinkLight = Color(0xFFFCE4EC)
-val LaundryPinkSoftBg = Color(0xFFFFF0F3)
+// Light Blue Palette
+val LightBluePrimary = Color(0xFF0284C7)      // Sky Blue Primary
+val LightBlueHover = Color(0xFF0369A1)        // Deep Sky Blue Hover
+val LightBlueContainer = Color(0xFFE0F2FE)    // Light Ice Blue Container
+val LightBlueSoftBg = Color(0xFFF0F9FF)       // Very Soft Light Blue Background
 
-val LaundryMateCanvas = Color(0xFFFDF6F8)
+val LaundryMateCanvas = Color(0xFFF8FAFC)
 val LaundryMateCardBg = Color(0xFFFFFFFF)
-val LaundryMateLine = Color(0xFFF8D7E3)
+val LaundryMateLine = Color(0xFFBAE6FD)       // Soft Light Blue Line Border
 
-val LaundryTextPrimary = Color(0xFF2D1822)
-val LaundryTextMuted = Color(0xFF886E78)
+val LaundryTextPrimary = Color(0xFF0F172A)
+val LaundryTextMuted = Color(0xFF64748B)
 
-val LaundryGreen = Color(0xFF2E7D32)
-val LaundryGreenLight = Color(0xEFE6F4EA)
-val LaundryAmber = Color(0xFFF57C00)
-val LaundryAmberLight = Color(0xFFFFF3E0)
+val LaundryGreen = Color(0xFF10B981)
+val LaundryGreenLight = Color(0xFFECFDF5)
+val LaundryAmber = Color(0xFFF59E0B)
+val LaundryAmberLight = Color(0xFFFFFBEB)
 
-// Backward compatibility mappings
-val WashdayBlue = LaundryPinkPrimary
-val WashdayBlueHover = LaundryPinkDark
-val WashdayBlueLight = LaundryPinkLight
+// Light Blue Gradient Brush
+val LightBlueBrush = Brush.horizontalGradient(
+    colors = listOf(
+        Color(0xFF0284C7),
+        Color(0xFF0EA5E9),
+        Color(0xFF38BDF8)
+    )
+)
+
+// Legacy / Compatibility Mappings pointing to Light Blue
+val LaundryPinkPrimary = LightBluePrimary
+val LaundryPinkDark = LightBlueHover
+val LaundryPinkLight = LightBlueContainer
+val LaundryPinkSoftBg = LightBlueSoftBg
+val RainbowBrush = LightBlueBrush
+
+val WashdayBlue = LightBluePrimary
+val WashdayBlueHover = LightBlueHover
+val WashdayBlueLight = LightBlueContainer
 val WashdayCanvas = LaundryMateCanvas
 val WashdayCardBg = LaundryMateCardBg
 val WashdayLine = LaundryMateLine
@@ -33,4 +49,4 @@ val WashdayGreen = LaundryGreen
 val WashdayGreenLight = LaundryGreenLight
 val WashdayAmber = LaundryAmber
 val WashdayAmberLight = LaundryAmberLight
-val WashdayCoral = LaundryPinkPrimary
+val WashdayCoral = LightBluePrimary

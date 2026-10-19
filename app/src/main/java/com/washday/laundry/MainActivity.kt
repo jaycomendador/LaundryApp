@@ -29,6 +29,7 @@ import com.washday.laundry.ui.components.ShopBottomNavigation
 import com.washday.laundry.ui.components.ShopHeader
 import com.washday.laundry.ui.components.ShopSidebarNavigation
 import com.washday.laundry.ui.components.ToastNotification
+import com.washday.laundry.ui.screens.CompletedOrdersHistoryScreen
 import com.washday.laundry.ui.screens.CustomerHistoryScreen
 import com.washday.laundry.ui.screens.DashboardScreen
 import com.washday.laundry.ui.screens.LoginScreen
@@ -146,6 +147,10 @@ fun LaundryMateApp(repository: LaundryRepository) {
                                         onUpdateOrderStatus = { id, st -> repository.updateOrderStatus(id, st) },
                                         onShowToast = { showToast(it) }
                                     )
+                                    ShopTab.COMPLETED_HISTORY -> CompletedOrdersHistoryScreen(
+                                        orders = orders,
+                                        onShowToast = { showToast(it) }
+                                    )
                                     ShopTab.NEW_ORDER -> NewOrderFlowScreen(
                                         services = services,
                                         onSaveOrder = { name, contact, service, weight, charges ->
@@ -167,6 +172,7 @@ fun LaundryMateApp(repository: LaundryRepository) {
                                         services = services
                                     )
                                     ShopTab.SETTINGS -> SettingsScreen(
+                                        onNavigateToTab = { currentTab = it },
                                         onExportBackup = { repository.exportBackupJson() },
                                         onImportRestore = { repository.importRestoreJson(it) },
                                         onLogout = { repository.logout() },
@@ -233,6 +239,10 @@ fun LaundryMateApp(repository: LaundryRepository) {
                                     onUpdateOrderStatus = { id, st -> repository.updateOrderStatus(id, st) },
                                     onShowToast = { showToast(it) }
                                 )
+                                ShopTab.COMPLETED_HISTORY -> CompletedOrdersHistoryScreen(
+                                    orders = orders,
+                                    onShowToast = { showToast(it) }
+                                )
                                 ShopTab.NEW_ORDER -> NewOrderFlowScreen(
                                     services = services,
                                     onSaveOrder = { name, contact, service, weight, charges ->
@@ -254,6 +264,7 @@ fun LaundryMateApp(repository: LaundryRepository) {
                                     services = services
                                 )
                                 ShopTab.SETTINGS -> SettingsScreen(
+                                    onNavigateToTab = { currentTab = it },
                                     onExportBackup = { repository.exportBackupJson() },
                                     onImportRestore = { repository.importRestoreJson(it) },
                                     onLogout = { repository.logout() },

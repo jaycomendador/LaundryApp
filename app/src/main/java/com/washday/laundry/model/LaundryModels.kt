@@ -1,13 +1,15 @@
 package com.washday.laundry.model
 
 enum class ShopTab(val title: String, val iconName: String) {
-    DASHBOARD("Dashboard", "home"),
-    NEW_ORDER("New Order", "plus"),
-    SERVICES("Services", "washer"),
+    DASHBOARD("Home", "home"),
     ORDERS("Orders", "receipt"),
+    NEW_ORDER("New Order", "plus"),
+    COMPLETED_HISTORY("History", "history"),
+    SETTINGS("Settings", "gear"),
+    // Additional secondary pages accessed via Dashboard & Settings
     SALES("Sales Summary", "chart"),
     CUSTOMERS("Customers", "user"),
-    SETTINGS("Settings", "gear")
+    SERVICES("Services", "washer")
 }
 
 data class UserSession(
@@ -36,7 +38,7 @@ data class LaundryOrder(
     val basePrice: Double,
     val additionalCharges: Double = 0.0,
     val totalAmount: Double,
-    val status: String, // Received, Washing, Drying, Ready for Pickup, Claimed
+    val status: String, // Received, Washing, Drying, Ready for Pickup, Claimed, Completed
     val paymentStatus: String = "Paid"
 )
 

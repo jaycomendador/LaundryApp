@@ -7,10 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme = lightColorScheme(
-    primary = LaundryPinkPrimary,
+    primary = LightBluePrimary,
     onPrimary = Color.White,
-    primaryContainer = LaundryPinkLight,
-    onPrimaryContainer = LaundryPinkPrimary,
+    primaryContainer = LightBlueContainer,
+    onPrimaryContainer = LightBluePrimary,
     background = LaundryMateCanvas,
     onBackground = LaundryTextPrimary,
     surface = LaundryMateCardBg,
@@ -30,7 +30,6 @@ fun LaundryMateTheme(
     )
 }
 
-// Alias for compatibility
 @Composable
 fun WashdayTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
