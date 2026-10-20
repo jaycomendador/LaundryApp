@@ -46,6 +46,7 @@ import com.washday.laundry.ui.theme.LaundryPinkLight
 import com.washday.laundry.ui.theme.LaundryPinkPrimary
 import com.washday.laundry.ui.theme.LaundryTextMuted
 import com.washday.laundry.ui.theme.LaundryTextPrimary
+import com.washday.laundry.ui.theme.RainbowBrush
 
 @Composable
 fun ShopHeader(
@@ -69,13 +70,13 @@ fun ShopHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Laundry Mate Logo & Title
+            // Laundry Mate Rainbow Logo & Title
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
-                        .background(LaundryPinkPrimary),
+                        .background(RainbowBrush),
                     contentAlignment = Alignment.Center
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -83,13 +84,13 @@ fun ShopHeader(
                             imageVector = Icons.Default.LocalLaundryService,
                             contentDescription = "Logo",
                             tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(8.dp)
+                            modifier = Modifier.size(9.dp)
                         )
                     }
                 }
@@ -105,7 +106,7 @@ fun ShopHeader(
                         letterSpacing = (-0.5).sp
                     )
                     Text(
-                        text = "Clean Clothes Happy Days",
+                        text = "Clean Clothes Happy Days 🌈",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,
                         color = LaundryTextMuted
@@ -125,7 +126,7 @@ fun ShopHeader(
                             onMarkNotificationsRead()
                         },
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
                             .background(Color.White)
                             .border(1.dp, LaundryMateLine, CircleShape)
@@ -157,7 +158,7 @@ fun ShopHeader(
                             .background(Color.White)
                     ) {
                         Text(
-                            text = "Notifications",
+                            text = "Notifications 🌈",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = LaundryTextPrimary,
@@ -194,14 +195,14 @@ fun ShopHeader(
                     }
                 }
 
-                // Profile Badge
+                // Staff Profile Badge
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .background(Color.White)
                         .border(1.dp, LaundryMateLine, RoundedCornerShape(20.dp))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
                     Box(
                         modifier = Modifier

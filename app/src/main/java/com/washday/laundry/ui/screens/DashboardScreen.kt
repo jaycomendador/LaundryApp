@@ -1,5 +1,6 @@
 package com.washday.laundry.ui.screens
 
+import java.util.Calendar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +27,6 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocalLaundryService
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Storefront
@@ -66,6 +66,7 @@ import com.washday.laundry.ui.theme.LaundryPinkLight
 import com.washday.laundry.ui.theme.LaundryPinkPrimary
 import com.washday.laundry.ui.theme.LaundryTextMuted
 import com.washday.laundry.ui.theme.LaundryTextPrimary
+import com.washday.laundry.ui.theme.RainbowBrush
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -78,7 +79,18 @@ fun DashboardScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedOrderForReceipt by remember { mutableStateOf<LaundryOrder?>(null) }
-    val statusOptions = listOf("Pending", "In Progress", "Ready for Pickup", "Completed")
+    val statusOptions = listOf("Pending", "In Progress", "Ready for Pickup", "Claimed")
+
+    // Dynamic Time-Based Greeting
+    val timeGreeting = remember {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        when (hour) {
+            in 5..11 -> "Good Morning, Staff! ☀️"
+            in 12..16 -> "Good Afternoon, Staff! 🌤️"
+            in 17..21 -> "Good Evening, Staff! 🌙"
+            else -> "Good Night, Staff! 🌌"
+        }
+    }
 
     Column(
         modifier = modifier
@@ -87,13 +99,18 @@ fun DashboardScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Staff Hero Banner
+        // Staff Hero Banner with Dynamic Time Greeting
         Card(
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = LaundryPinkPrimary),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(RainbowBrush)
+                    .padding(24.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -101,15 +118,16 @@ fun DashboardScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Good Morning, Staff!",
+                            text = timeGreeting,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Here's today's summary",
                             fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.85f)
+                            color = Color.White.copy(alpha = 0.9f)
                         )
                     }
 
@@ -117,7 +135,7 @@ fun DashboardScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.2f)),
+                            .background(Color.White.copy(alpha = 0.25f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(Icons.Default.Storefront, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
@@ -239,7 +257,7 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // 4. Customer History
+                    // 4. Customers
                     ShortcutItem("Customers", Icons.Default.People, LaundryPinkPrimary, Modifier.weight(1f)) {
                         onNavigateToTab(ShopTab.CUSTOMERS)
                     }
@@ -291,13 +309,13 @@ fun DashboardScreen(
                         ) {
                             Box {
                                 val statusBg = when (order.status) {
-                                    "Completed" -> LaundryGreenLight
-                                    "In Progress" -> LaundryAmberLight
+                                    "Claimed", "Completed" -> LaundryGreenLight
+                                    "In Progress", "Washing", "Drying" -> LaundryAmberLight
                                     else -> LaundryPinkLight
                                 }
                                 val statusFg = when (order.status) {
-                                    "Completed" -> LaundryGreen
-                                    "In Progress" -> LaundryAmber
+                                    "Claimed", "Completed" -> LaundryGreen
+                                    "In Progress", "Washing", "Drying" -> LaundryAmber
                                     else -> LaundryPinkDark
                                 }
 
@@ -321,7 +339,7 @@ fun DashboardScreen(
                                             onClick = {
                                                 onUpdateOrderStatus(order.id, st)
                                                 showStatusMenu = false
-                                                onShowToast("Order #${order.id} status updated to $st")
+                                                onShowToast("Order #${order.id} updated to $st")
                                             }
                                         )
                                     }
@@ -330,10 +348,7 @@ fun DashboardScreen(
 
                             IconButton(
                                 onClick = { selectedOrderForReceipt = order },
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(LaundryMateCanvas)
+                                modifier = Modifier.size(36.dp).clip(CircleShape).background(LaundryMateCanvas)
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Receipt", tint = LaundryTextPrimary, modifier = Modifier.size(18.dp))
                             }
